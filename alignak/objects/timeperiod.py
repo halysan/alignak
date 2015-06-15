@@ -969,7 +969,7 @@ class Timeperiods(Items):
         # And now apply inheritance for unresolved properties
         # like the dateranges in fact
         for tp in self:
-            tp.get_unresolved_properties_by_inheritance(self)
+            tp.get_unresolved_properties_by_inheritance(self.items)
 
     def is_correct(self):
         """
