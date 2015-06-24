@@ -244,7 +244,8 @@ class Itemgroups(Items):
 
     def fill_default(self):
         """
-        Put property and it default value for properties not defined and not required in each itemgroup
+        Put property and it default value for properties not defined and not required in
+        each itemgroup
         """
         for i in self:
             i.fill_default()
