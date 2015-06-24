@@ -50,6 +50,11 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+This module provide Discoveryrule and Discoveryrules class used to define rules for discover
+hosts/services with scan of network
+"""
+
 from copy import copy
 
 from item import Item, Items
@@ -60,6 +65,10 @@ from alignak.property import StringProp, ListProp, IntegerProp
 
 
 class Discoveryrule(MatchingItem):
+    """
+    Class to manage rule for discovery
+    An Discoveryrule is a rule for discovery
+    """
     id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'discoveryrule'
 
@@ -80,11 +89,16 @@ class Discoveryrule(MatchingItem):
 
     macros = {}
 
-    # The init of a discovery will set the property of
-    # Discoveryrule.properties as in setattr, but all others
-    # will be in a list because we need to have all names
-    # and not lost all in __dict__
     def __init__(self, params={}):
+        """
+        The init of a discovery will set the property of
+        Discoveryrule.properties as in setattr, but all others
+        will be in a list because we need to have all names
+        and not lost all in __dict__
+
+        :param params: dictionnary of parameters
+        :type params: dict
+        """
         cls = self.__class__
 
         # We have our own id of My Class type :)
@@ -153,8 +167,13 @@ class Discoveryrule(MatchingItem):
             # each instance to have his own running prop!
 
 
-    # Output name
     def get_name(self):
+        """
+        Get name of the rule
+
+        :return: name of the rule
+        :rtype: str
+        """
         try:
             return self.discoveryrule_name
         except AttributeError:
@@ -162,5 +181,9 @@ class Discoveryrule(MatchingItem):
 
 
 class Discoveryrules(Items):
+    """
+    Class to manage discovery rules
+    An Discoveryrules is used to regroup all Discoveryrule
+    """
     name_property = "discoveryrule_name"
     inner_class = Discoveryrule
