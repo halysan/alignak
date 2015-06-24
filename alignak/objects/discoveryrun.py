@@ -49,6 +49,11 @@
 #  You should have received a copy of the GNU Affero General Public License
 #  along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+This module provide Discoveryrun and Discoveryruns class used to discover hosts/services with
+scan of network
+"""
+
 from copy import copy
 
 from item import Item, Items
@@ -60,6 +65,10 @@ from alignak.macroresolver import MacroResolver
 
 
 class Discoveryrun(MatchingItem):
+    """
+    Class to manage a discovery
+    An Discoveryrun is used to discover hosts/services on network with a command
+    """
     id = 1  # zero is always special in database, so we do not take risk here
     my_type = 'discoveryrun'
 
@@ -74,11 +83,16 @@ class Discoveryrun(MatchingItem):
         'current_launch': StringProp(default=None),
     })
 
-    # The init of a discovery will set the property of
-    # Discoveryrun.properties as in setattr, but all others
-    # will be in a list because we need to have all names
-    # and not lost all in __dict__
     def __init__(self, params={}):
+        """
+        The init of a discovery will set the property of
+        Discoveryrun.properties as in setattr, but all others
+        will be in a list because we need to have all names
+        and not lost all in __dict__
+
+        :param params: dictionnary of parameters
+        :type params: dict
+        """
         cls = self.__class__
 
         # We have our own id of My Class type :)
@@ -124,48 +138,90 @@ class Discoveryrun(MatchingItem):
             # each instance to have his own running prop!
 
 
-    # Output name
     def get_name(self):
+        """
+        Output name
+
+        :return: Name of discoveryrun
+        :rtype: str
+        """
         try:
             return self.discoveryrun_name
         except AttributeError:
             return "UnnamedDiscoveryRun"
 
-    # A Run that is first level means that it do not have
-    # any matching filter
     def is_first_level(self):
+        """
+        A Run that is first level means that it do not have
+        any matching filter
+
+        :return: true is it is first level
+        :rtype: bool
+        """
         return len(self.not_matches) + len(self.matches) == 0
 
-    # Get an eventhandler object and launch it
     def launch(self, ctx=[], timeout=300):
+        """
+        Get an eventhandler object and launch it
+
+        :param ctx: elements
+        :type ctx: list
+        :param timeout:it's the timeout in seconds
+        :type timeout: int
+        """
         m = MacroResolver()
         cmd = m.resolve_command(self.discoveryrun_command, ctx)
         self.current_launch = EventHandler(cmd, timeout=timeout)
         self.current_launch.execute()
 
     def check_finished(self):
+        """
+        Process code for finish launch
+        """
         max_output = 10 ** 9
         # print "Max output", max_output
         self.current_launch.check_finished(max_output)
 
-    # Look if the current launch is done or not
     def is_finished(self):
+        """
+        Check if the launch is finished
+
+        :return: true if finished to run
+        :rtype: bool
+        """
         if self.current_launch is None:
             return True
         if self.current_launch.status in ('done', 'timeout'):
             return True
         return False
 
-    # we use an EventHandler object, so we have output with a single line
-    # and longoutput with the rest. We just need to return all
     def get_output(self):
+        """
+        Get the output of the launch
+        we use an EventHandler object, so we have output with a single line
+        and longoutput with the rest. We just need to return all
+
+        :return: output of lunch
+        :rtype: str
+        """
         return '\n'.join([self.current_launch.output, self.current_launch.long_output])
 
 
 class Discoveryruns(Items):
+    """
+    Class to manage list of Discoveryrun
+    Discoveryruns is used to regroup all the Discoveryrun
+    """
     name_property = "discoveryrun_name"
     inner_class = Discoveryrun
 
     def linkify(self, commands):
+        """
+        Link commands to Discoveryruns
+        One command = one Discoveryrun
+
+        :param commands: command objects
+        :type commands: list of object
+        """
         for r in self:
             r.linkify_one_command_with_commands(commands, 'discoveryrun_command')
